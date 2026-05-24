@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sailor Moon Chatbot – Usagi Tsukino</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --rosa-claro: #ffe4ec;
+            --rosa: #ff9ec4;
+            --rosa-intenso: #ff6b9d;
+            --rosa-oscuro: #d63384;
+            --azul-cielo: #a8d8ea;
+            --azul-oscuro: #4a90e2;
+            --amarillo: #ffd93d;
+            --dorado: #f5a623;
+            --blanco: #ffffff;
+            --sombra-rosa: rgba(255, 158, 196, 0.4);
+            --sombra-azul: rgba(74, 144, 226, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; transform: scale(0.8); }
+            50% { opacity: 1; transform: scale(1.2); }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        @keyframes bounce-in {
+            0% { transform: scale(0); opacity: 0; }
+            60% { transform: scale(1.1); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes slide-up {
+            0% { transform: translateY(20px); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 10px var(--sombra-rosa), 0 0 20px var(--sombra-rosa); }
+            50% { box-shadow: 0 0 20px var(--rosa-intenso), 0 0 40px var(--rosa-intenso); }
+        }
+
+        @keyframes moon-spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes sparkle-fall {
+            0% { transform: translateY(-10px) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+        }
+
+        @keyframes heart-beat {
+            0%, 100% { transform: scale(1); }
+            25% { transform: scale(1.15); }
+            50% { transform: scale(1); }
+            75% { transform: scale(1.15); }
+        }
+
+        @keyframes rainbow-border {
+            0% { border-color: #ff6b9d; }
+            25% { border-color: #ffd93d; }
+            50% { border-color: #a8d8ea; }
+            75% { border-color: #c084fc; }
+            100% { border-color: #ff6b9d; }
+        }
+
+        @keyframes typing-bounce {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-8px); }
+        }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: linear-gradient(135deg, #ffe4ec 0%, #ffd6e0 25%, #e8d5f2 50%, #d4e5f7 75%, #c8e6f5 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Estrellas animadas de fondo */
+        .stars-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .star {
+            position: absolute;
+            color: var(--amarillo);
+            font-size: 1.2rem;
+            animation: twinkle 2s infinite ease-in-out;
+        }
+
+        .star:nth-child(1) { top: 5%; left: 10%; animation-delay: 0s; }
+        .star:nth-child(2) { top: 15%; left: 80%; animation-delay: 0.5s; }
+        .star:nth-child(3) { top: 25%; left: 20%; animation-delay: 1s; }
+        .star:nth-child(4) { top: 10%; left: 50%; animation-delay: 1.5s; }
+        .star:nth-child(5) { top: 40%; left: 90%; animation-delay: 0.3s; }
+        .star:nth-child(6) { top: 60%; left: 5%; animation-delay: 0.8s; }
+        .star:nth-child(7) { top: 70%; left: 70%; animation-delay: 1.2s; }
+        .star:nth-child(8) { top: 80%; left: 30%; animation-delay: 0.6s; }
+        .star:nth-child(9) { top: 35%; left: 60%; animation-delay: 1.8s; }
+        .star:nth-child(10) { top: 50%; left: 45%; animation-delay: 0.2s; }
+
+        /* Lunas decorativas */
+        .moon-decoration {
+            position: fixed;
+            font-size: 3rem;
+            animation: float 4s ease-in-out infinite;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.6;
+        }
+
+        .moon-decoration:nth-child(1) { top: 8%; right: 5%; animation-delay: 0s; }
+        .moon-decoration:nth-child(2) { bottom: 10%; left: 3%; animation-delay: 1.5s; }
+        .moon-decoration:nth-child(3) { top: 50%; right: 2%; animation-delay: 3s; font-size: 2rem; }
+
+        /* Chat principal */
+        .chat-container {
+            width: 100%;
+            max-width: 480px;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(15px);
+            border-radius: 30px;
+            box-shadow: 
+                0 8px 32px rgba(255, 107, 157, 0.2),
+                0 0 0 4px rgba(255, 255, 255, 0.5),
+                inset 0 0 20px rgba(255, 228, 236, 0.5);
+            overflow: hidden;
+            position: relative;
+            z-index: 1;
+            animation: bounce-in 0.8s ease-out;
+            border: 3px solid transparent;
+            animation: bounce-in 0.8s ease-out, rainbow-border 4s linear infinite;
+        }
+
+        /* Header */
+        .chat-header {
+            background: linear-gradient(135deg, var(--rosa-intenso) 0%, var(--rosa-oscuro) 50%, var(--azul-oscuro) 100%);
+            padding: 25px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .chat-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 70%);
+            animation: moon-spin 20s linear infinite;
+        }
+
+        .header-emoji {
+            font-size: 2.5rem;
+            margin-bottom: 8px;
+            display: block;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .chat-header h1 {
+            font-family: 'Fredoka One', cursive;
+            color: var(--blanco);
+            font-size: 1.8rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+            position: relative;
+            z-index: 1;
+        }
+
+        .chat-header p {
+            color: rgba(255,255,255,0.95);
+            font-size: 0.95rem;
+            margin-top: 5px;
+            font-weight: 600;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header-stars {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+        }
+
+        .header-star {
+            position: absolute;
+            color: var(--amarillo);
+            font-size: 1rem;
+            animation: twinkle 1.5s infinite ease-in-out;
+        }
+
+        /* Estado API */
+        .api-status {
+            background: linear-gradient(90deg, rgba(255,255,255,0.3), rgba(255,255,255,0.1), rgba(255,255,255,0.3));
+            padding: 10px;
+            text-align: center;
+            font-size: 0.85rem;
+            color: var(--rosa-oscuro);
+            font-weight: 700;
+            letter-spacing: 1px;
+            animation: pulse-glow 2s infinite;
+            border-bottom: 2px dashed var(--rosa);
+        }
+
+        /* Área de mensajes */
+        .chat-messages {
+            height: 400px;
+            overflow-y: auto;
+            padding: 20px;
+            background: linear-gradient(180deg, rgba(255,228,236,0.3) 0%, rgba(212,229,247,0.3) 100%);
+            scroll-behavior: smooth;
+        }
+
+        .chat-messages::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .chat-messages::-webkit-scrollbar-track {
+            background: rgba(255, 228, 236, 0.3);
+            border-radius: 10px;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: linear-gradient(var(--rosa), var(--azul-cielo));
+            border-radius: 10px;
+        }
+
+        /* Burbujas de mensaje */
+        .message {
+            display: flex;
+            align-items: flex-end;
+            margin-bottom: 15px;
+            animation: slide-up 0.4s ease-out;
+        }
+
+        .message.bot {
+            justify-content: flex-start;
+        }
+
+        .message.user {
+            justify-content: flex-end;
+        }
+
+        .message-avatar {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            flex-shrink: 0;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .message.bot .message-avatar {
+            background: linear-gradient(135deg, var(--rosa), var(--rosa-intenso));
+            margin-right: 10px;
+            border: 3px solid var(--blanco);
+        }
+
+        .message.user .message-avatar {
+            background: linear-gradient(135deg, var(--azul-cielo), var(--azul-oscuro));
+            margin-left: 10px;
+            border: 3px solid var(--blanco);
+            order: 2;
+        }
+
+        .message-bubble {
+            max-width: 75%;
+            padding: 14px 18px;
+            border-radius: 20px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            position: relative;
+            word-wrap: break-word;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+
+        .message.bot .message-bubble {
+            background: linear-gradient(135deg, var(--rosa-claro), var(--rosa));
+            color: var(--rosa-oscuro);
+            border-bottom-left-radius: 5px;
+            border: 2px solid rgba(255, 255, 255, 0.6);
+        }
+
+        .message.user .message-bubble {
+            background: linear-gradient(135deg, var(--azul-cielo), #7ec8e3);
+            color: #1a5276;
+            border-bottom-right-radius: 5px;
+            border: 2px solid rgba(255, 255, 255, 0.6);
+        }
+
+        /* Indicador de escritura */
+        .typing-indicator {
+            display: none;
+            align-items: center;
+            padding: 15px 20px;
+            background: linear-gradient(135deg, var(--rosa-claro), var(--rosa));
+            border-radius: 20px;
+            border-bottom-left-radius: 5px;
+            max-width: 100px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            border: 2px solid rgba(255, 255, 255, 0.6);
+        }
+
+        .typing-indicator.active {
+            display: flex;
+        }
+
+        .typing-dot {
+            width: 10px;
+            height: 10px;
+            background: var(--rosa-oscuro);
+            border-radius: 50%;
+            margin: 0 3px;
+            animation: typing-bounce 1.4s infinite ease-in-out;
+        }
+
+        .typing-dot:nth-child(1) { animation-delay: 0s; }
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+        /* Input area */
+        .chat-input-area {
+            padding: 15px 20px;
+            background: rgba(255, 255, 255, 0.9);
+            border-top: 2px dashed var(--rosa);
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 14px 20px;
+            border: 2px solid var(--rosa);
+            border-radius: 25px;
+            font-family: 'Nunito', sans-serif;
+            font-size: 0.95rem;
+            outline: none;
+            transition: all 0.3s ease;
+            background: rgba(255, 228, 236, 0.3);
+            color: var(--rosa-oscuro);
+        }
+
+        .chat-input::placeholder {
+            color: var(--rosa);
+            font-style: italic;
+        }
+
+        .chat-input:focus {
+            border-color: var(--rosa-intenso);
+            box-shadow: 0 0 15px var(--sombra-rosa);
+            background: var(--blanco);
+        }
+
+        .send-btn {
+            width: 50px;
+            height: 50px;
+            border: none;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--rosa-intenso), var(--rosa-oscuro));
+            color: var(--blanco);
+            font-size: 1.3rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px var(--sombra-rosa);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .send-btn:hover:not(:disabled) {
+            transform: scale(1.1) rotate(10deg);
+            box-shadow: 0 6px 25px var(--rosa-intenso);
+        }
+
+        .send-btn:active:not(:disabled) {
+            transform: scale(0.95);
+        }
+
+        .send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            filter: grayscale(0.5);
+        }
+
+        /* Decoraciones adicionales */
+        .decoration-ribbon {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            pointer-events: none;
+        }
+
+        .ribbon-top-left {
+            top: -5px;
+            left: -5px;
+            background: linear-gradient(135deg, var(--amarillo), var(--dorado));
+            border-radius: 0 0 30px 0;
+            box-shadow: 2px 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .ribbon-top-right {
+            top: -5px;
+            right: -5px;
+            background: linear-gradient(225deg, var(--amarillo), var(--dorado));
+            border-radius: 0 0 0 30px;
+            box-shadow: -2px 2px 10px rgba(0,0,0,0.1);
+        }
+
+        /* Responsive */
+        @media (max-width: 520px) {
+            .chat-container {
+                max-width: 100%;
+                border-radius: 20px;
+            }
+
+            .chat-messages {
+                height: 350px;
+            }
+
+            .chat-header h1 {
+                font-size: 1.5rem;
+            }
+        }
+
+        /* Animación de entrada para nuevos mensajes */
+        @keyframes message-pop {
+            0% { transform: scale(0.8); opacity: 0; }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .message-new {
+            animation: message-pop 0.4s ease-out;
+        }
+    </style>
+</head>
+<body>
+    <!-- Estrellas de fondo -->
+    <div class="stars-container">
+        <div class="star">✨</div>
+        <div class="star">⭐</div>
+        <div class="star">✨</div>
+        <div class="star">🌟</div>
+        <div class="star">✨</div>
+        <div class="star">⭐</div>
+        <div class="star">✨</div>
+        <div class="star">🌟</div>
+        <div class="star">✨</div>
+        <div class="star">⭐</div>
+    </div>
+
+    <!-- Lunas decorativas flotantes -->
+    <div class="moon-decoration">🌙</div>
+    <div class="moon-decoration">🌙</div>
+    <div class="moon-decoration">🌙</div>
+
+    <!-- Contenedor principal del chat -->
+    <div class="chat-container">
+        <!-- Cintas decorativas -->
+        <div class="decoration-ribbon ribbon-top-left"></div>
+        <div class="decoration-ribbon ribbon-top-right"></div>
+
+        <!-- Header -->
+        <div class="chat-header">
+            <div class="header-stars">
+                <span class="header-star" style="top:10%;left:15%;">✨</span>
+                <span class="header-star" style="top:20%;right:20%;animation-delay:0.3s;">⭐</span>
+                <span class="header-star" style="bottom:15%;left:25%;animation-delay:0.6s;">✨</span>
+                <span class="header-star" style="top:30%;right:10%;animation-delay:0.9s;">🌟</span>
+            </div>
+            <span class="header-emoji">🌙✨💖</span>
+            <h1>Usagi-chan Bot</h1>
+            <p>la guerrera sailor más amorosa y glotona 🍰🐰</p>
+        </div>
+
+        <!-- Estado de la API -->
+        <div class="api-status" id="apiStatus">
+            ✨ Cargando poder del corazón... ✨
+        </div>
+
+        <!-- Área de mensajes -->
+        <div class="chat-messages" id="chatMessages">
+            <div class="message bot">
+                <div class="message-avatar">🐰</div>
+                <div class="message-bubble">
+                    ¡Hola! Soy Usagi Tsukino, también conocida como Sailor Moon. ¿Quieres charlar? ¡Ah, y si tienes pastel, mejor! 🍰✨🌙
+                </div>
+            </div>
+        </div>
+
+        <!-- Indicador de escritura -->
+        <div class="typing-indicator" id="typingIndicator">
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+        </div>
+
+        <!-- Área de input -->
+        <div class="chat-input-area">
+            <input type="text" class="chat-input" id="userInput" placeholder="Escríbele a Usagi... 💌" disabled>
+            <button class="send-btn" id="sendBtn" disabled>
+                💫
+            </button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
