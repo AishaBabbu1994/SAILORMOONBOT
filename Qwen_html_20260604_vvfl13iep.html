@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot Sailor Moon</title>
+    <style>
+        body { 
+            font-family: 'Arial', sans-serif; 
+            background-color: #e6f2ff; 
+            color: #0066cc; 
+            padding: 20px;
+            margin: 0;
+            position: relative;
+            min-height: 100vh;
+        }
+        
+        /* Background sticker de Sailor Moon */
+        .usagi-sticker {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 200px;
+            height: auto;
+            opacity: 0.15;
+            z-index: 0;
+            pointer-events: none;
+            transform: rotate(-15deg);
+        }
+        
+        .container { 
+            max-width: 600px; 
+            margin: 0 auto; 
+            background: white; 
+            padding: 20px; 
+            border-radius: 15px; 
+            border: 3px solid #ff3366;
+            position: relative;
+            z-index: 1;
+        }
+        .api-bar { margin-bottom: 15px; text-align: center; }
+        .api-bar input { width: 80%; padding: 10px; border: 2px solid #ff3366; border-radius: 8px; outline: none; }
+        .chat-box { height: 300px; overflow-y: auto; border: 2px solid #ff3366; border-radius: 10px; padding: 10px; margin-bottom: 10px; background: #fff0f5; }
+        .message { margin: 8px 0; padding: 10px; border-radius: 10px; line-height: 1.4; }
+        .usagi { background: #ffe6f2; text-align: right; margin-left: 20%; }
+        .user { background: #e6f2ff; text-align: left; margin-right: 20%; }
+        .input-area { display: flex; gap: 8px; }
+        .input-area input { flex: 1; padding: 10px; border: 2px solid #ff3366; border-radius: 8px; outline: none; }
+        button { padding: 10px 20px; background: #ff3366; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        button:hover { background: #cc0033; }
+    </style>
+</head>
+<body>
+    <!-- Sticker de Sailor Moon como background -->
+    <img src="sailor-moon-sticker.png" alt="Usagi" class="usagi-sticker">
+    
+    <div class="container">
+        <h2 style="text-align: center;">🌙 Chatbot Sailor Moon 🌙</h2>
+        
+        <!-- Barra para la API Key de Groq -->
+        <div class="api-bar">
+            <input type="password" id="apiKey" placeholder="🔑 Pega aquí tu API Key de Groq">
+        </div>
+
+        <div class="chat-box" id="chatBox">
+            <div class="message usagi">¡Holi! 🌙 Soy Usagi/Sailor Moon. ¿Quieres hablar de amor, justicia y luna? ✨ ¡O quizás de dulces! 🍰 ¡Pregúntame lo que quieras!</div>
+        </div>
+
+        <div class="input-area">
+            <input type="text" id="userInput" placeholder="Escribe tu mensaje aquí...">
+            <button onclick="sendMessage()">Enviar ⭐</button>
+        </div>
+    </div>
+
+    <script>
+        async function sendMessage() {
+            const apiKey = document.getElementById('apiKey').value;
+            const userInput = document.getElementById('userInput').value;
+            const chatBox = document.getElementById('chatBox');
+
+            if (!apiKey) { alert('Por favor, añade tu API Key de Groq primero. 🔑'); return; }
+            if (!userInput.trim()) return;
+
+            chatBox.innerHTML += `<div class="message user">Tú: ${userInput}</div>`;
+            document.getElementById('userInput').value = '';
+
+            chatBox.innerHTML += `<div class="message usagi" id="loading">Usagi está pensando... 🌙</div>`;
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            try {
+                const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${apiKey}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        model: "groq/compound",
+                        messages: [
+                            { role: "system", content: "Eres Usagi Tsukino/Sailor Moon. Eres alegre, dramática, un poco llorona pero valiente. Te encantan los dulces 🍰 y el amor 💕. Usas emojis de luna 🌙, estrellas ⭐ y corazones 💖. Responde de forma breve, clara y energética. A veces eres un poco torpe pero siempre luchas por el amor y la justicia." },
+                            { role: "user", content: userInput }
+                        ]
+                    })
+                });
+
+                const data = await response.json();
+                document.getElementById('loading').remove();
+
+                if (data.choices && data.choices[0]) {
+                    const reply = data.choices[0].message.content;
+                    chatBox.innerHTML += `<div class="message usagi">Usagi: ${reply}</div>`;
+                } else {
+                    chatBox.innerHTML += `<div class="message usagi">¡Ay no! Algo salió mal con mi transformación. ✨ (Revisa tu API Key)</div>`;
+                }
+            } catch (error) {
+                document.getElementById('loading').remove();
+                chatBox.innerHTML += `<div class="message usagi">Error de conexión. 🌙</div>`;
+            }
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+    </script>
+</body>
+</html>
